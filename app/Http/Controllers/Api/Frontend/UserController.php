@@ -137,16 +137,16 @@ class UserController extends Controller
                 'expired_at' => Carbon::now()->addSeconds(90)
             ]);
             Mail::to($user->email)->send(new UserLogin($user));
-            $code = Str::random(40);
-            $user->update([
-                'code' => $code
-            ]);
+            return 'ok';
+            // $code = Str::random(40);
+            // $user->update([
+            //     'code' => $code
+            // ]);
             return response()->json([
-                'result' => 'Send CodeVerify With Email',
-                'code' => $code
+                'result' => 'رمز عبور به ایمیلتان ارسال شد.'
             ]);
         } else {
-            return response()->json(['errorEmail' => 'Invalid Email'], 404);
+            return response()->json(['errorEmail' => 'ایمیل وارد شده در سیستم ثبت نشده است'], 404);
         }
     }
 

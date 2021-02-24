@@ -31,6 +31,7 @@ class CaseController extends Controller
     {
         $user = Auth::user();
         if ($user->role == 'clerk') {
+            // return 5;
             $cases = CaseFile::where('user_id', $user->id)->get();
             // return Response($cases);
             if ($cases) {

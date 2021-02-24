@@ -7,7 +7,7 @@ use App\Models\Address;
 use App\Models\File;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\DB;
 class DashboardIndexResource extends JsonResource
 {
     /**
@@ -26,7 +26,7 @@ class DashboardIndexResource extends JsonResource
                 'username' => $this->username,
                 'email' => $this->email,
                 'meliNumber' => $this->number_meli,
-                'city' => Address::where('user_id', $this->id)->pluck('city'),
+                'city' => DB::table('cities')->where('id',Address::where('user_id', $this->id)->get()->pluck('city_id')[0])->get()->pluck('name')[0],
                 'street' => Address::where('user_id', $this->id)->pluck('street'),
                 'role' =>$this->role
             ];
@@ -37,7 +37,7 @@ class DashboardIndexResource extends JsonResource
                 'username' => $this->username,
                 'email' => $this->email,
                 'meliNumber' => $this->number_meli,
-                'city' => Address::where('user_id', $this->id)->pluck('city'),
+                'city' => DB::table('cities')->where('id',Address::where('user_id', $this->id)->get()->pluck('city_id')[0])->get()->pluck('name')[0],
                 'street' => Address::where('user_id', $this->id)->pluck('street'),
                 'role' => $this->role,
                 'avatar' => asset('storage/files/' . $this->files->where('file_what', 'profile')->pluck('file_name')[0])

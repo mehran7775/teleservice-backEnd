@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use function GuzzleHttp\Promise\all;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -43,15 +44,16 @@ class DashboardController extends Controller
                 'centerFile' => 'required|file|mimes:pdf',
                 'expertFile' => 'nullable',
                 'city' => 'required',
-                'street' => 'required'
+                'street' => 'required|min:3|max:20'
             ]);
+            $city_id=DB::table('cities')->where('name',$request->input('city'))->get()->pluck('id')[0];
             $user->role = $request->input('role');
             $user['number_meli'] = $request->input('meliNumber');
             $user->save();
             (new UploadController())->store($request);
             Address::create([
                 'user_id' => $user->id,
-                'city' => $request->input('city'),
+                'city_id' => $city_id,
                 'street' => $request->input('street')
             ]);
             return Response(
@@ -67,15 +69,16 @@ class DashboardController extends Controller
                 'meliFile' => 'required|mimes:jpg,png|max:2048',
                 'madrakFile' => 'required|file|mimes:pdf',
                 'city' => 'required',
-                'street' => 'required'
+                'street' => 'required|min:3|max:20'
             ]);
+            $city_id=DB::table('cities')->where('name',$request->input('city'))->get()->pluck('id')[0];
             $user->role = $request->input('role');
             $user['number_meli'] = $request->input('meliNumber');
             $user->save();
             (new UploadController)->store($request);
             Address::create([
                 'user_id' => $user->id,
-                'city' => $request->input('city'),
+                'city_id' => $city_id,
                 'street' => $request->input('street')
             ]);
             return Response(
@@ -119,9 +122,10 @@ class DashboardController extends Controller
             'email' => $request->input('email'),
             'number_meli' => $request->input('meliNumber')
         ];
+        $city_id=DB::table('cities')->where('name',$request->input('city'))->get()->pluck('id')[0];
         $user->update($data);
         $user->address->update([
-            'city' => $request->input('city'),
+            'city_id' => $city_id,
             'street' => $request->input('street')
         ]);
         $files = $request->allFiles();

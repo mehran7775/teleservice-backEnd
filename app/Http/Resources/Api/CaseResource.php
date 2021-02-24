@@ -32,7 +32,6 @@ class CaseResource extends JsonResource
             // ]),
             $this->mergeWhen($this->report()->first(),[
                 'report' => $this->report()->get()->pluck('content')->implode(''),
-                // 'report' => $this->report()->get()->map->only('content'),
             ]),
             'caseFile' =>asset('storage/files/cases'.$this->name)
         ];

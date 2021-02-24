@@ -10,7 +10,7 @@ class Sick extends Model
     public $timestamps=false;
     
     public function cases(){
-        return $this->hasMany(CaseFile::calss,'sick_id');
+        return $this->hasMany(CaseFile::class,'sick_id');
     }
 
 }

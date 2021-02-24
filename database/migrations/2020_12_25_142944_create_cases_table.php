@@ -17,7 +17,7 @@ class CreateCasesTable extends Migration
             $table->id();
             $table->bigInteger('user_id')->unsigned();
             $table->bigInteger('sick_id')->unsigned();
-            $table->bigInteger('category_id')->unsigned();
+            $table->integer('category_id')->unsigned();
             $table->string('name');
             $table->bigInteger('size');
             $table->bigInteger('cost');

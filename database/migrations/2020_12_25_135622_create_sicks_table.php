@@ -15,7 +15,7 @@ class CreateSicksTable extends Migration
     {
         Schema::create('sicks', function (Blueprint $table) {
             $table->id();
-            $table->char('full_name');
+            $table->char('full_name',35);
             $table->char('number_meli',10)->unique();
         });
     }
