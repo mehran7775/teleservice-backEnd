@@ -33,10 +33,13 @@ class UserLogin extends Mailable
      */
     public function build()
     {
-        return response()->json([
-            'message' => 'user new password',
-            'code_verify' => $this->user->codeVerifies()->pluck('code_verify_login')->first(),
+        // return $this->user->codeVerifies()->pluck('code_verify_login')->first();
+        return $this->view('loginWithEmail')->with(['code_verify'=> $this->user->codeVerifies()->pluck('code_verify_login')->first()]);
+        
+        // return response()->json([
+        //     'message' => 'user new password',
+        //     'code_verify' => $this->user->codeVerifies()->pluck('code_verify_login')->first(),
 
-        ], 200);
+        // ], 200);
     }
 }

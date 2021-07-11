@@ -63,11 +63,11 @@ Route::group(['namespace' => 'Api\Frontend'],function (){
         'as' => 'login_with_email',
         'uses'=>'UserController@loginWithEmail'
     ]);
-    Route::get('account/loginWithEmail',[
-        'as' => 'login_with_email',
-        'uses'=>'UserController@showloginWithEmail'
-    ]);
-    Route::post('account/loginWithEmail/{token}',[
+    // Route::get('account/loginWithEmail',[
+    //     'as' => 'login_with_email',
+    //     'uses'=>'UserController@showloginWithEmail'
+    // ]);
+    Route::post('account/doLoginWithEmail',[
         'as' => 'doLogin_with_email' ,
         'uses'=>'UserController@doLoginWithEmail'
     ]);

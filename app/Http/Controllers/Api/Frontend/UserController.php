@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Frontend;
 
+
 use App\Http\Requests\api\User\UserRegisterRequest;
 use App\Http\Resources\Api\LoginRecource;
 use App\Jobs\SendEmailNotify;
@@ -101,7 +102,10 @@ class UserController extends Controller
             'password' => 'required|min:6',
         ]);
         $remember = $request->has('remember');
-        $credentials = request(['username', 'password']);
+        $credentials =array(
+            "username" => $request->input('username'),
+            "password" => $request->input('password')
+        );
         if (Auth::attempt($credentials, $remember)) {
             $token = Auth::user()->createToken('Personal Access Token')->accessToken;
             $user = Auth::user();
@@ -117,27 +121,29 @@ class UserController extends Controller
         }
     }
 
-    public function get_all_user()
-    {
-        $users = User::all();
-        return response()->json(
-            [
-                'users' => $users
-            ]
-        );
-    }
+    // public function get_all_user()
+    // {
+    //     $users = User::all();
+    //     return response()->json(
+    //         [
+    //             'users' => $users
+    //         ]
+    //     );
+    // }
 
     public function loginWithEmail(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email|min:12,max:30'
+        ]);
         if ($user = User::where('email', $request->input('email'))->first()) {
-            $code_verify = Str::random(5);
+            $code_verify = Str::random(6);
             $object = CodeVerify::create([
                 'user_id' => $user->id,
                 'code_verify_login' => $code_verify,
                 'expired_at' => Carbon::now()->addSeconds(90)
             ]);
             Mail::to($user->email)->send(new UserLogin($user));
-            return 'ok';
             // $code = Str::random(40);
             // $user->update([
             //     'code' => $code
@@ -150,30 +156,53 @@ class UserController extends Controller
         }
     }
 
-    public function showloginWithEmail()
-    {
-        return response()->json(['result' => 'ok']);
-    }
+    // public function showloginWithEmail()
+    // {
+    //     return response()->json(['result' => 'ok']);
+    // }
 
-    public function doLoginWithEmail(Request $request, $code)
+    public function doLoginWithEmail(Request $request)
     {
-        $user = User::where('code', $code)->first();
-        $time = $user->codeVerifies()->pluck('expired_at')->toArray();
-        $object = new CodeVerify();
-        if (Carbon::now()->toDateTimeString() < $time[0]) {
-            $code_verify = $user->codeVerifies()->pluck('code_verify_login')->first();
-            $code_email = $request->input('code_email');
-            if ($code_email == $code_verify) {
-                $newUser = Auth::loginUsingId($user->id);
-                $token = $newUser->createToken('Personal Access Token')->accessToken;
-                return response()->json(['token' => $token]);
+        $request->validate([
+            'email' => 'required|email|min:12,max:30',
+            'password' => 'required|min:6,max:16'
+        ]);
+        if ($user = User::where('email', $request->input('email'))->first()) {
+            // $remember = $request->has('remember');
+            // $credentials = $request('password');
+            $code = $user->codeVerifies()->pluck('code_verify_login')->first();
+            if ($request->input('password') === $code) {
+                $token = $user->createToken('Personal Access Token')->accessToken;
+                return Response()->json([
+                    'success' => trans('api.user.login_withEmail.success'),
+                    'token' => $token,
+                    'user' => new LoginRecource($user)
+                ]);
             } else {
-                return response()->json(['errorCode' => 'Invalid CodeVerify']);
+                return response()->json([
+                    'failed' => trans('api.user.login_withEmail.failed')
+                ], 404);
             }
         } else {
-            CodeVerify::where('user_id', $user->id)->delete();
-            return response()->json(['errorTime' => 'Time is up'], 400);
+            return response()->json(['errorEmail' => 'ایمیل وارد شده در سیستم ثبت نشده است'], 404);
         }
+        // $user = User::where('code', $code)->first();
+        // $time = $user->codeVerifies()->pluck('expired_at')->toArray();
+        // $object = new CodeVerify();
+        // if (Carbon::now()->toDateTimeString() < $time[0]) {
+        //     $code_verify = $user->codeVerifies()->pluck('code_verify_login')->first();
+        //     $code_email = $request->input('code_email');
+        //     if ($code_email == $code_verify) {
+        //         $newUser = Auth::loginUsingId($user->id);
+        //         $token = $newUser->createToken('Personal Access Token')->accessToken;
+        //         return response()->json(['token' => $token]);
+        //     } else {
+        //         return response()->json(['errorCode' => 'Invalid CodeVerify']);
+        //     }
+        // } else {
+        //     CodeVerify::where('user_id', $user->id)->delete();
+        //     return response()->json(['errorTime' => 'Time is up'], 400);
+        // }
     }
 
     public function logOut(Request $request)
@@ -184,12 +213,12 @@ class UserController extends Controller
     public function get_wallet()
     {
         $user = Auth::user();
-        if ($wallet=DB::table('wallets')->where('user_id',$user->id)->first()) {
+        if ($wallet = DB::table('wallets')->where('user_id', $user->id)->first()) {
             $amount = $wallet->amount;
             return Response([
                 'wallet' => $amount
-            ],200);
-        }else {
+            ], 200);
+        } else {
             return Response([
                 'wallet' => 0
             ]);
